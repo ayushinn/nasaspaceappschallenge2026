@@ -45,9 +45,11 @@ that move.
 
 You have two options; the deck is already built for you.
 
-1. **Slide deck (recommended, already done).** Open `submission/demo-deck.html`, print to PDF
-   (landscape, 7 pages), upload to Google Drive, set "Anyone with the link → Viewer", and paste
-   that URL here.
+1. **Slide deck (recommended, already done).** `submission/SPHEREx-Blink-demo.pptx` — 7 slides,
+   16:9, real PowerPoint format. Regenerate with `python3 scripts/build_deck.py`. Before uploading,
+   replace the "Live demo" line on slide 7 with your deployed URL. Upload to Google Drive, set
+   "Anyone with the link → Viewer", and paste that URL here. (`submission/demo-deck.html` is the
+   same deck as a web page if you would rather print it to PDF.)
 2. **30-second video.** Script below, if you would rather record your screen.
 
 ```
