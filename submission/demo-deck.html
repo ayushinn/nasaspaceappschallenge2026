@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>SPHEREx Blink — demo deck</title>
+<style>
+  @page { size: 1280px 720px; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #07090d; color: #dde5f2;
+    font-family: "Inter", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .slide {
+    width: 1280px; height: 720px; padding: 56px 64px;
+    position: relative; overflow: hidden;
+    page-break-after: always; break-after: page;
+    background:
+      radial-gradient(900px 420px at 8% -10%, rgba(79,209,255,.10), transparent 60%),
+      radial-gradient(760px 400px at 95% -8%, rgba(255,179,71,.09), transparent 62%),
+      #07090d;
+    display: flex; flex-direction: column;
+  }
+  .slide:last-child { page-break-after: auto; }
+  .mono { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; }
+  .kicker {
+    font: 600 13px/1.4 ui-monospace, Menlo, monospace; letter-spacing: .18em;
+    text-transform: uppercase; color: #ffb347; margin-bottom: 18px;
+  }
+  h1 { font-size: 62px; line-height: 1.05; letter-spacing: -.02em; font-weight: 700; }
+  h2 { font-size: 40px; line-height: 1.15; letter-spacing: -.01em; font-weight: 600; margin-bottom: 22px; }
+  h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; }
+  p, li { font-size: 19px; line-height: 1.55; color: #b9c4d4; }
+  .lede { font-size: 24px; line-height: 1.5; color: #cfd8e6; max-width: 30ch; }
+  .muted { color: #78869a; }
+  .accent { color: #ffb347; }
+  .cyan { color: #4fd1ff; }
+  .row { display: flex; gap: 40px; align-items: flex-start; }
+  .col { flex: 1; min-width: 0; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 26px; }
+  .card { border: 1px solid #1b2231; background: #0b0f16; border-radius: 12px; padding: 20px 22px; }
+  .card p { font-size: 16px; line-height: 1.5; }
+  .shot { border: 1px solid #1b2231; border-radius: 10px; width: 100%; display: block; }
+  .shot-caption { font: 12px/1.5 ui-monospace, Menlo, monospace; color: #6b7788; margin-top: 10px; }
+  .rule { height: 1px; background: #1b2231; margin: 26px 0; }
+  ul { list-style: none; }
+  li { padding-left: 22px; position: relative; margin-bottom: 12px; }
+  li::before {
+    content: ""; position: absolute; left: 0; top: 10px;
+    width: 7px; height: 7px; border-radius: 50%; background: #ffb347;
+  }
+  .num { font: 600 40px/1 ui-monospace, Menlo, monospace; color: #4fd1ff; }
+  .num-label { font-size: 14px; color: #78869a; margin-top: 6px; }
+  .foot {
+    position: absolute; left: 64px; right: 64px; bottom: 26px;
+    display: flex; justify-content: space-between;
+    font: 11.5px/1.4 ui-monospace, Menlo, monospace; color: #4e5766;
+  }
+  .pipe { display: flex; align-items: center; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
+  .step {
+    border: 1px solid #1b2231; background: #0b0f16; border-radius: 8px;
+    padding: 10px 13px; font: 12.5px/1.35 ui-monospace, Menlo, monospace; color: #cfd8e6;
+  }
+  .arrow { color: #3b4657; font-size: 15px; }
+  .tag {
+    display: inline-block; font: 600 11px/1 ui-monospace, Menlo, monospace;
+    letter-spacing: .1em; text-transform: uppercase; color: #ffb347;
+    border: 1px solid #7a5220; background: rgba(255,179,71,.08);
+    border-radius: 999px; padding: 6px 11px;
+  }
+  .ack { font-size: 12px; line-height: 1.6; color: #5b6676; margin-top: auto; max-width: 96ch; }
+</style>
+</head>
+<body>
+
+<!-- 1 — title -->
+<section class="slide">
+  <div class="kicker">NASA Space Apps Challenge 2026 &nbsp;·&nbsp; Planet X and SPHEREx</div>
+  <h1>SPHEREx Blink</h1>
+  <p class="lede" style="margin-top:22px">
+    Pick any patch of sky. Watch every epoch NASA's SPHEREx has taken of it.
+    See what moved.
+  </p>
+  <div class="rule"></div>
+  <div class="row" style="margin-top:6px">
+    <div class="col"><h3>Team</h3><p>kepleris — Ayushi Upadhyay (solo)</p></div>
+    <div class="col"><h3>Local event</h3><p>Delhi (virtual)</p></div>
+    <div class="col"><h3>Built with</h3><p>NASA SPHEREx DR1 &amp; QR3 from IRSA, ESA Gaia DR3</p></div>
+  </div>
+  <div class="foot"><span>SPHEREx Blink</span><span>1 / 7</span></div>
+</section>
+
+<!-- 2 — problem -->
+<section class="slide">
+  <div class="kicker">The problem</div>
+  <h2>A billion objects, and the moving ones are the interesting ones.</h2>
+  <div class="row">
+    <div class="col">
+      <ul>
+        <li>SPHEREx images the whole sky every six months, in 102 near-infrared bands.</li>
+        <li>Comets, asteroids, brown dwarfs and nearby stars reveal themselves by <em>changing position</em> between images.</li>
+        <li>Volunteers found most known comets and brown dwarfs this way — Pluto, too.</li>
+        <li>But at 6.2 arcseconds per pixel, a year of motion is often less than one pixel.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="card">
+        <h3 class="accent">The gap</h3>
+        <p>
+          There is no simple public way to say "show me this patch at every epoch, lined up,
+          so I can see what changed." The archive gives you files. It does not give you a view.
+        </p>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3 class="cyan">The question</h3>
+        <p>What would it take for a volunteer with no astronomy software to spot a moving object?</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>SPHEREx Blink</span><span>2 / 7</span></div>
+</section>
+
+<!-- 3 — what it does -->
+<section class="slide">
+  <div class="kicker">What it does</div>
+  <h2>Coordinates in, time series out.</h2>
+  <div class="row">
+    <div class="col" style="flex: 0 0 470px">
+      <ul>
+        <li><strong>Any RA/Dec</strong>, decimal or sexagesimal — or one click on the five challenge targets.</li>
+        <li><strong>Blink, Difference, Mean stack</strong> playback with speed and scrubbing.</li>
+        <li><strong>All six detector arrays</strong>, 0.75–5.0 µm.</li>
+        <li><strong>Light curve</strong> and full metadata per epoch.</li>
+        <li><strong>Shareable URL</strong> for every view.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <img class="shot" src="../artifacts/blink-default.png" alt="SPHEREx Blink showing Epsilon Indi" />
+      <p class="shot-caption">Epsilon Indi, 6 epochs, 514-day baseline. The ring is the object: SPHEREx saturates on bright stars and masks the core.</p>
+    </div>
+  </div>
+  <div class="foot"><span>SPHEREx Blink</span><span>3 / 7</span></div>
+</section>
+
+<!-- 4 — difference -->
+<section class="slide">
+  <div class="kicker">The idea that makes it work</div>
+  <h2>When the motion is smaller than a pixel, subtract instead of blink.</h2>
+  <div class="row">
+    <div class="col">
+      <img class="shot" src="../artifacts/blink-difference.png" alt="Difference image of R Draconis" />
+      <p class="shot-caption">R Draconis, epoch minus reference. Warm = brighter now, cool = dimmer.</p>
+    </div>
+    <div class="col" style="flex: 0 0 420px">
+      <ul>
+        <li>Difference imaging turns a sub-pixel shift into a bright, obvious signal.</li>
+        <li>The background pedestal between epochs is removed first, or zodiacal light swamps everything.</li>
+        <li>Registration is measured, not assumed — residual offsets are reported in the interface.</li>
+      </ul>
+      <div class="card" style="margin-top:6px">
+        <h3 class="accent">Result</h3>
+        <p>R Draconis swings 1.6× and Barnard's Star 1.5× across the epochs shown — visible in seconds, from a browser.</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>SPHEREx Blink</span><span>4 / 7</span></div>
+</section>
+
+<!-- 5 — how it works -->
+<section class="slide">
+  <div class="kicker">How it works</div>
+  <h2>Six steps from archive to animation.</h2>
+  <div class="pipe">
+    <div class="step">IVOA SIA2 query<br /><span class="muted">IRSA, DR1 + QR3</span></div>
+    <span class="arrow">→</span>
+    <div class="step">Cluster into epochs<br /><span class="muted">32-day window</span></div>
+    <span class="arrow">→</span>
+    <div class="step">Cutout per epoch<br /><span class="muted">~4 MB MEF</span></div>
+    <span class="arrow">→</span>
+    <div class="step">Decode FITS<br /><span class="muted">own reader</span></div>
+    <span class="arrow">→</span>
+    <div class="step">Resample north-up<br /><span class="muted">CD matrix</span></div>
+    <span class="arrow">→</span>
+    <div class="step">Register + photometry<br /><span class="muted">correlation</span></div>
+  </div>
+  <div class="grid3">
+    <div class="card">
+      <h3>Why re-orient</h3>
+      <p>Cutouts arrive in the spacecraft's orientation: −163.7° in survey 1, +19.6° in survey 2 at the same field. Blinking raws shows rotation, not motion.</p>
+    </div>
+    <div class="card">
+      <h3>Why register</h3>
+      <p>Masked, high-pass Pearson correlation, sub-pixel parabola fit. Frames that fail are reported, not silently shown.</p>
+    </div>
+    <div class="card">
+      <h3>Why it is fast</h3>
+      <p>The 3.9 MB PSF table in every cutout is skipped by size arithmetic, and responses are cached — the five targets reload instantly.</p>
+    </div>
+  </div>
+  <div class="foot"><span>SPHEREx Blink</span><span>5 / 7</span></div>
+</section>
+
+<!-- 6 — insight -->
+<section class="slide">
+  <div class="kicker">What the data taught us</div>
+  <h2>The sky has moved since the catalogue epoch.</h2>
+  <div class="row">
+    <div class="col">
+      <p>
+        Barnard's Star travels 10.3 arcseconds a year. By 2026 its published J2000 position is
+        <span class="accent">4.5 arcminutes</span> away from where SPHEREx actually sees it —
+        almost the entire default field.
+      </p>
+      <p style="margin-top:16px">
+        So presets carry Gaia DR3 proper motion and are propagated to the observation epoch
+        before the archive is searched. Without that step the tool shows an empty field and the
+        object you asked for is off the edge.
+      </p>
+      <p style="margin-top:16px" class="muted">
+        The same check caught two wrong coordinates in our own target list, which were corrected
+        against Gaia before submission.
+      </p>
+    </div>
+    <div class="col" style="flex: 0 0 430px">
+      <div class="card">
+        <div class="num">10.3″<span style="font-size:16px;color:#78869a">/yr</span></div>
+        <div class="num-label">Barnard's Star proper motion</div>
+        <div class="rule" style="margin:16px 0"></div>
+        <div class="num">4.5′</div>
+        <div class="num-label">drift since J2000 — nearly one field</div>
+        <div class="rule" style="margin:16px 0"></div>
+        <div class="num">6.2″</div>
+        <div class="num-label">one SPHEREx pixel</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>SPHEREx Blink</span><span>6 / 7</span></div>
+</section>
+
+<!-- 7 — impact -->
+<section class="slide">
+  <div class="kicker">Impact</div>
+  <h2>Anybody can now ask "what changed here?"</h2>
+  <div class="row">
+    <div class="col">
+      <ul>
+        <li><strong>For volunteers:</strong> a one-click path to blinking and difference imaging, with the alignment and photometry done properly.</li>
+        <li><strong>For educators:</strong> URL-shareable views of real NIR survey data, stable across a lesson.</li>
+        <li><strong>Next:</strong> spectra on the fly from the LVF axis, a combined six-array stack for depth, and Gaia/WISE overlays.</li>
+      </ul>
+      <p class="muted" style="margin-top:16px;font-size:16px">
+        TypeScript, React and a hand-written FITS reader. No Python, no database, no API keys —
+        IRSA's services are public. Built solo in about a day.
+      </p>
+    </div>
+    <div class="col" style="flex: 0 0 400px">
+      <div class="card">
+        <h3 class="accent">Try it</h3>
+        <p class="mono" style="font-size:14px;word-break:break-all">&lt;deployed URL goes here&gt;</p>
+        <div class="rule" style="margin:16px 0"></div>
+        <h3>Data</h3>
+        <p>SPHEREx spectral images, DR1 and QR3, NASA/IPAC Infrared Science Archive. Gaia DR3 proper motions, ESA.</p>
+      </div>
+    </div>
+  </div>
+  <p class="ack">
+    This publication makes use of data products from the Spectro-Photometer for the History of the
+    Universe, Epoch of Reionization and Ices Explorer (SPHEREx), which is a joint project of the Jet
+    Propulsion Laboratory and the California Institute of Technology, and is funded by the National
+    Aeronautics and Space Administration. This work has made use of data from the European Space
+    Agency (ESA) mission Gaia, processed by the Gaia Data Processing and Analysis Consortium (DPAC).
+    Code and text were developed with AI assistance; see the repository README for the disclosure.
+  </p>
+  <div class="foot"><span>SPHEREx Blink</span><span>7 / 7</span></div>
+</section>
+
+</body>
+</html>
