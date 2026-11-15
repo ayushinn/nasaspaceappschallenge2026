@@ -77,25 +77,72 @@ export function parseSiaCsv(text: string): Observation[] {
   return out;
 }
 
-async function siaQuery(
+/**
+ * IRSA answers a SIA query in ~20 s and serves only about two concurrent
+ * requests per client: anything beyond that is rejected immediately with 502
+ * (measured: the rejection comes back in ~0.2 s, and the same query succeeds
+ * seconds later). A single transient rejection must not lose a whole patch, so
+ * every attempt gets its own timeout and the call is retried with a short
+ * backoff — a rejected attempt is cheap because it fails instantly.
+ */
+const SIA_ATTEMPTS = 4;
+const SIA_TIMEOUT_MS = 45_000;
+
+async function siaOnce(
   collection: string,
+  label: string,
   ra: number,
   dec: number,
   radiusDeg: number,
-  signal?: AbortSignal,
 ): Promise<Observation[]> {
   const url =
     `${SIA_ENDPOINT}?COLLECTION=${collection}` +
     `&POS=${encodeURIComponent(`circle ${ra} ${dec} ${radiusDeg}`)}` +
     `&RESPONSEFORMAT=CSV`;
-  const res = await fetch(url, { signal, headers: { "user-agent": "spherex-blink/1.0 (hackathon demo)" } });
-  if (!res.ok) {
-    throw new Error(
-      `The IRSA archive did not answer the ${collection} image search (HTTP ${res.status}). ` +
-        `That is upstream, not your query — try again in a moment.`,
-    );
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), SIA_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: { "user-agent": "spherex-blink/1.0 (hackathon demo)" },
+    });
+    if (!res.ok) {
+      throw new Error(
+        `The IRSA archive did not answer the ${label} image search (HTTP ${res.status}). ` +
+          `That is upstream, not your query — try again in a moment.`,
+      );
+    }
+    return parseSiaCsv(await res.text());
+  } finally {
+    clearTimeout(timer);
   }
-  return parseSiaCsv(await res.text());
+}
+
+async function siaQuery(
+  collection: string,
+  label: string,
+  ra: number,
+  dec: number,
+  radiusDeg: number,
+): Promise<Observation[]> {
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < SIA_ATTEMPTS; attempt++) {
+    try {
+      return await siaOnce(collection, label, ra, dec, radiusDeg);
+    } catch (err) {
+      lastErr = err;
+      if (attempt < SIA_ATTEMPTS - 1) {
+        await new Promise((r) => setTimeout(r, 1500 * (attempt + 1) + Math.random() * 800));
+      }
+    }
+  }
+  throw lastErr;
+}
+
+export interface SearchResult {
+  observations: Observation[];
+  /** Releases that never answered, so the caller can say so instead of failing. */
+  failedReleases: ReleaseKey[];
 }
 
 export async function searchObservations(
@@ -103,17 +150,23 @@ export async function searchObservations(
   dec: number,
   radiusDeg: number,
   releases: ReleaseKey[],
-): Promise<Observation[]> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 30_000);
-  try {
-    const batches = await Promise.all(
-      releases.map((r) => siaQuery(COLLECTIONS[r].id, ra, dec, radiusDeg, controller.signal)),
-    );
-    return batches.flat();
-  } finally {
-    clearTimeout(timer);
-  }
+): Promise<SearchResult> {
+  const settled = await Promise.allSettled(
+    releases.map((r) => siaQuery(COLLECTIONS[r].id, COLLECTIONS[r].label, ra, dec, radiusDeg)),
+  );
+  const observations: Observation[] = [];
+  const failedReleases: ReleaseKey[] = [];
+  let firstError: unknown;
+  settled.forEach((result, i) => {
+    if (result.status === "fulfilled") observations.push(...result.value);
+    else {
+      failedReleases.push(releases[i]);
+      if (firstError === undefined) firstError = result.reason;
+    }
+  });
+  // One release down is a degraded result worth showing; both down is a failure.
+  if (failedReleases.length === releases.length) throw firstError;
+  return { observations, failedReleases };
 }
 
 export interface EpochGroup {

@@ -26,7 +26,9 @@ export interface ApiResult {
 
 const MAX_EPOCHS = 10;
 const MIN_COVERAGE = 0.9;
-const CONCURRENCY = 3;
+// IRSA serves roughly two concurrent requests per client and rejects the rest
+// instantly, so asking for more just makes our own frames queue behind retries.
+const CONCURRENCY = 2;
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const CACHE_MAX = 60;
 
@@ -128,9 +130,19 @@ function subsample<T>(items: T[], n: number): T[] {
 
 async function buildDataset(req: DatasetRequest) {
   const radiusDeg = Math.max(0.02, Math.min(0.25, req.fovDeg * 0.6));
-  const observations = await searchObservations(req.ra, req.dec, radiusDeg, req.releases);
+  const { observations, failedReleases } = await searchObservations(
+    req.ra,
+    req.dec,
+    radiusDeg,
+    req.releases,
+  );
   const groups = groupEpochs(observations, req.detector);
   const notes: string[] = [];
+  if (failedReleases.length) {
+    notes.push(
+      `${failedReleases.map((r) => COLLECTIONS[r].label).join("/")} did not answer just now, so this blink uses ${req.releases.length > 1 ? "the remaining release" : "nothing else"}. Reload to try for the full set.`,
+    );
+  }
 
   const empty = (message: string) => ({
     query: req,

@@ -37,13 +37,17 @@ export interface RawFrame {
 
 const UA = "spherex-blink/1.0 (NASA Space Apps hackathon demo)";
 
-/** IRSA's cutout service answers 503 when busy; retry with backoff. */
+/**
+ * IRSA's cutout service answers 503 when busy, and the rejection is immediate
+ * while a served cutout takes under a second, so retrying is cheap but has to
+ * outlast a queue of other requests — six attempts spend roughly 25 s waiting.
+ */
 export async function fetchCutout(
   accessUrl: string,
   ra: number,
   dec: number,
   sizeDeg: number,
-  attempts = 4,
+  attempts = 6,
 ): Promise<Uint8Array> {
   const url = `${accessUrl}?center=${ra.toFixed(5)},${dec.toFixed(5)}&size=${sizeDeg.toFixed(4)}`;
   let lastErr: unknown;
